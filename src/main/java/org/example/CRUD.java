@@ -1,20 +1,23 @@
 package org.example;
 
 import org.hibernate.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.management.Query;
 import java.util.List;
 
-public class CRUD<T> {
-    private SessionFactory sessionFactory;
+public class CRUD<T> implements InterfaceCRUD {
+    public SessionFactory sessionFactory;
     private final Class<T> user;
+    private final Logger logger = LoggerFactory.getLogger(CRUD.class);
 
     public CRUD(Class<T> user) {
         this.user = user;
         this.sessionFactory = HibernateUtil.getSessionFactory();
     }
 
-    public void create(T entity){
+    @Override
+    public void create(Object entity){
         Session session = getCurrentSession();
         Transaction transaction = null;
         try{
@@ -25,9 +28,11 @@ public class CRUD<T> {
             if(transaction != null) {
                 transaction.rollback();
             }
+            logger.warn("ошибка в create");
             throw e;
         }
     }
+    @Override
     public T readById(Long id){
         Session session = getCurrentSession();
         Transaction transaction = null;
@@ -40,9 +45,11 @@ public class CRUD<T> {
             if(transaction != null) {
                 transaction.rollback();
             }
+            logger.warn("ошибка в readById");
             throw e;
         }
     }
+    @Override
     public List<T> readall(){
         Session session = getCurrentSession();
         Transaction transaction = null;
@@ -52,15 +59,16 @@ public class CRUD<T> {
             List<T> resultList = getCurrentSession().createQuery(hql, user).getResultList();
             transaction.commit();
             return resultList;
-
         }catch (Exception e){
             if(transaction != null) {
                 transaction.rollback();
             }
+            logger.warn("ошибка в readAll");
             throw e;
         }
     }
-    public void update(T entity){
+    @Override
+    public void update(Object entity){
         Session session = getCurrentSession();
         Transaction transaction = null;
         try{
@@ -72,6 +80,7 @@ public class CRUD<T> {
             if(transaction != null) {
                 transaction.rollback();
             }
+            logger.warn("ошибка в update");
             throw e;
         }
     }
@@ -87,12 +96,15 @@ public class CRUD<T> {
             if(transaction != null) {
                 transaction.rollback();
             }
+            logger.warn("ошибка в delete");
             throw e;
         }
     }
+    @Override
     public void deleteById(Long id){
         T entity = readById(id);
         if (entity == null) {
+            logger.warn("ошибка в deleteById");
             throw new IllegalArgumentException("Данные по этому id: " + id + " не найдены");
         }
         delete(entity);
@@ -116,5 +128,4 @@ public class CRUD<T> {
     protected Session getCurrentSession() {
         return sessionFactory.getCurrentSession();
     }
-
 }
