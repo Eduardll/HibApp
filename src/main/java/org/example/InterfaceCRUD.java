@@ -4,9 +4,9 @@ import java.util.List;
 
 public interface InterfaceCRUD<T> {
 
-    public abstract void create(Object entity);
-    public abstract T readById(Long id);
-    public abstract void update(T entity);
-    public abstract void deleteById(Long id);
-    public abstract List<T> readall();
+    void create(Object entity);
+    T readById(Long id);
+    void update(T entity);
+    void deleteById(Long id);
+    List<T> readall();
 }
