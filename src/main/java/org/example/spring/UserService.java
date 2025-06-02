@@ -10,16 +10,20 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapping userMapping;
+    private final KafkaSend kafkaSend;
     @Autowired
-    public UserService(UserRepository userRepository,UserMapping userMapping){
+    public UserService(UserRepository userRepository,UserMapping userMapping,KafkaSend kafkaSend){
         this.userRepository = userRepository;
         this.userMapping = userMapping;
+        this.kafkaSend = kafkaSend;
     }
 
 
     public UserDTO createUser(UserDTO userDTO){
         User user = userMapping.toEntity(userDTO);
         User save = userRepository.save(user);
+        UserDTOKafka userDTOKafka = new UserDTOKafka("created",save.getAge(),save.getName(),save.getEmail());
+        kafkaSend.sendUserCreatedEvent(userDTOKafka);
         return userMapping.toDTO(save);
     }
 
@@ -38,6 +42,8 @@ public class UserService {
     }
 
     public void deleteUser(Long id){
+        UserDTOKafka userDTOKafka = new UserDTOKafka("delete",id);
+        kafkaSend.sendUserDeletedEvent(userDTOKafka);
         userRepository.deleteById(id);
     }
 
@@ -48,6 +54,9 @@ public class UserService {
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
         User update = userRepository.save(user);
+
+        UserDTOKafka userDTOKafka = new UserDTOKafka("update",update.getAge(),update.getName(),update.getEmail());
+        kafkaSend.sendUserUpdateEvent(userDTOKafka);
         return userMapping.toDTO(update);
     }
 }

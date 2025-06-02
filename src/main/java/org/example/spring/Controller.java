@@ -18,7 +18,7 @@ public class Controller {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED) // Устанавливает статус 201 Created
+    @ResponseStatus(HttpStatus.CREATED)
     public UserDTO createUser(@RequestBody UserDTO userDto) {
         return userService.createUser(userDto);
     }
